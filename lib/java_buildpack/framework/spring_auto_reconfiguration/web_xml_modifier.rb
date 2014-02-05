@@ -48,8 +48,7 @@ module JavaBuildpack::Framework
     # @return [void]
     def augment_root_context
       if has_context_loader_listener?
-        augment_context_config_locations web_app(@document), 'context-param', CONTEXT_LOCATION_DEFAULT
-        augment_context_initializer_classes web_app(@document), 'context-param'
+        augment web_app(@document), 'context-param'
       end
     end
 
@@ -58,8 +57,7 @@ module JavaBuildpack::Framework
     # @return [void]
     def augment_servlet_contexts
       servlets.each do |servlet|
-        augment_context_config_locations servlet, 'init-param', default_servlet_context_location(servlet)
-        augment_context_initializer_classes servlet, 'init-param'
+        augment servlet, 'init-param'
       end
     end
 
@@ -76,46 +74,23 @@ module JavaBuildpack::Framework
 
     private
 
-    CONTEXT_CLASS = 'contextClass'.freeze
-
-    CONTEXT_CLASS_ANNOTATION = 'org.springframework.web.context.support.AnnotationConfigWebApplicationContext'.freeze
-
-    CONTEXT_CONFIG_LOCATION = 'contextConfigLocation'.freeze
-
-    CONTEXT_INITIALIZER_ADDITIONAL = 'org.cloudfoundry.reconfiguration.spring.CloudApplicationContextInitializer'.freeze
+    CONTEXT_INITIALIZER_ADDITIONAL = %w(
+      org.cloudfoundry.reconfiguration.spring.CloudProfileApplicationContextInitializer
+      org.cloudfoundry.reconfiguration.spring.CloudPropertySourceApplicationContextInitializer
+      org.cloudfoundry.reconfiguration.spring.CloudAutoReconfigurationApplicationContextInitializer).freeze
 
     CONTEXT_INITIALIZER_CLASSES = 'contextInitializerClasses'.freeze
 
     CONTEXT_LOADER_LISTENER = 'ContextLoaderListener'.freeze
 
-    CONTEXT_LOCATION_ADDITIONAL_ANNOTATION = 'org.cloudfoundry.reconfiguration.spring.web.CloudAppAnnotationConfigAutoReconfig'.freeze
-
-    CONTEXT_LOCATION_ADDITIONAL_XML = 'classpath:META-INF/cloud/cloudfoundry-auto-reconfiguration-context.xml'.freeze
-
-    CONTEXT_LOCATION_DEFAULT = '/WEB-INF/applicationContext.xml'.freeze
-
     DISPATCHER_SERVLET = 'DispatcherServlet'.freeze
 
-    def additional_context_config_location(root, param_type)
-      has_annotation_application_context?(root, param_type) ? CONTEXT_LOCATION_ADDITIONAL_ANNOTATION : CONTEXT_LOCATION_ADDITIONAL_XML
-    end
-
-    def augment_context_config_locations(root, param_type, default_location)
-      locations_string = xpath(root, "#{param_type}[param-name[contains(text(), '#{CONTEXT_CONFIG_LOCATION}')]]/param-value/text()").first
-      locations_string = create_param(root, param_type, CONTEXT_CONFIG_LOCATION, default_location) unless locations_string
-
-      locations = locations_string.value.strip.split(/[,;\s]+/)
-      locations << additional_context_config_location(root, param_type)
-
-      locations_string.value = locations.join(' ') # rubocop:disable UselessSetterCall
-    end
-
-    def augment_context_initializer_classes(root, param_type)
+    def augment(root, param_type)
       classes_string = xpath(root, "#{param_type}[param-name[contains(text(), '#{CONTEXT_INITIALIZER_CLASSES}')]]/param-value/text()").first
       classes_string = create_param(root, param_type, CONTEXT_INITIALIZER_CLASSES, '') unless classes_string
 
       classes = classes_string.value.strip.split(/[,;\s]+/)
-      classes << CONTEXT_INITIALIZER_ADDITIONAL
+      classes = classes.concat CONTEXT_INITIALIZER_ADDITIONAL
 
       classes_string.value = classes.join(',') # rubocop:disable UselessSetterCall
     end
@@ -130,21 +105,10 @@ module JavaBuildpack::Framework
       REXML::Text.new value, true, param_value
     end
 
-    def default_servlet_context_location(servlet)
-      name = xpath(servlet, 'servlet-name/text()').first.value.strip
-      "/WEB-INF/#{name}-servlet.xml"
-    end
-
     def formatter
       formatter         = REXML::Formatters::Pretty.new(4)
       formatter.compact = true
       formatter
-    end
-
-    def has_annotation_application_context?(root, param_type)
-      context_class_name       = xpath(root, "#{param_type}[param-name[contains(text(), '#{CONTEXT_CLASS}')]]/param-value/text()").first
-      context_class_name_value = context_class_name ? context_class_name.value.strip : nil
-      CONTEXT_CLASS_ANNOTATION == context_class_name_value
     end
 
     def has_context_loader_listener?
