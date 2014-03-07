@@ -19,7 +19,7 @@
 # e.g.  repository_root: "http://example.com/oracle-jre/{platform}/{architecture}"
 
 repository_root: "http://www.webninjapr.com/delete/oracle-jre/{platform}/{architecture}"
-version: 1.7.0_+
+version: 1.7.+
 memory_sizes:
   permgen: 64m..
 memory_heuristics:
