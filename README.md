@@ -1,8 +1,8 @@
 # Cloud Foundry Java Buildpack
-[![Build Status](https://travis-ci.org/cloudfoundry/java-buildpack.png?branch=master)](https://travis-ci.org/cloudfoundry/java-buildpack)
-[![Dependency Status](https://gemnasium.com/cloudfoundry/java-buildpack.png)](http://gemnasium.com/cloudfoundry/java-buildpack)
-[![Code Climate](https://codeclimate.com/repos/5224adaec7f3a3415107004c/badges/bc49f7d7f8dfc47057c8/gpa.png)](https://codeclimate.com/repos/5224adaec7f3a3415107004c/feed)
-[![Code Climate](https://codeclimate.com/repos/5224adaec7f3a3415107004c/badges/bc49f7d7f8dfc47057c8/coverage.png)](https://codeclimate.com/repos/5224adaec7f3a3415107004c/feed)
+[![Build Status](https://travis-ci.org/cloudfoundry/java-buildpack.svg?branch=master)](https://travis-ci.org/cloudfoundry/java-buildpack)
+[![Dependency Status](https://gemnasium.com/cloudfoundry/java-buildpack.svg)](https://gemnasium.com/cloudfoundry/java-buildpack)
+[![Code Climate](https://codeclimate.com/repos/5224adaec7f3a3415107004c/badges/bc49f7d7f8dfc47057c8/gpa.svg)](https://codeclimate.com/repos/5224adaec7f3a3415107004c/feed)
+[![Code Climate](https://codeclimate.com/repos/5224adaec7f3a3415107004c/badges/bc49f7d7f8dfc47057c8/coverage.svg)](https://codeclimate.com/repos/5224adaec7f3a3415107004c/feed)
 
 The `java-buildpack` is a [Cloud Foundry][] buildpack for running JVM-based applications.  It is designed to run many JVM-based applications ([Grails][], [Groovy][], Java Main, [Play Framework][], [Spring Boot][], and Servlet) with no additional configuration, but supports configuration of the standard components, and extension to add custom components.
 
@@ -56,6 +56,7 @@ To learn how to configure various properties of the buildpack, follow the "Confi
 	* [Droplet](docs/extending-droplet.md)
 	* [BaseComponent](docs/extending-base_component.md)
 	* [VersionedDependencyComponent](docs/extending-versioned_dependency_component.md)
+	* [ModularComponent](docs/extending-modular_component.md)
 	* [Caches](docs/extending-caches.md) ([Configuration](docs/extending-caches.md#configuration))
 	* [Logging](docs/extending-logging.md) ([Configuration](docs/extending-logging.md#configuration))
 	* [Repositories](docs/extending-repositories.md) ([Configuration](docs/extending-repositories.md#configuration))
@@ -73,7 +74,7 @@ bundle install
 bundle exec rake
 ```
 
-[Installing Cloud Foundry on Vagrant][] is useful for privately testing new features.
+[Running Cloud Foundry locally][] is useful for privately testing new features.
 
 ## Contributing
 [Pull requests][] are welcome; see the [contributor guidelines][] for details.
@@ -87,8 +88,8 @@ This buildpack is released under version 2.0 of the [Apache License][].
 [GitHub's forking functionality]: https://help.github.com/articles/fork-a-repo
 [Grails]: http://grails.org
 [Groovy]: http://groovy.codehaus.org
-[Installing Cloud Foundry on Vagrant]: http://blog.cloudfoundry.com/2013/06/27/installing-cloud-foundry-on-vagrant/
 [Play Framework]: http://www.playframework.com
 [pull request]: https://help.github.com/articles/using-pull-requests
 [Pull requests]: http://help.github.com/send-pull-requests
+[Running Cloud Foundry locally]: http://docs.cloudfoundry.org/deploying/run-local.html
 [Spring Boot]: http://projects.spring.io/spring-boot/

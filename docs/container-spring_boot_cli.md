@@ -24,14 +24,14 @@ In order to specify [Spring profiles][], set the [`SPRING_PROFILES_ACTIVE`][] en
 ## Configuration
 For general information on configuring the buildpack, refer to [Configuration and Extension][].
 
-The container can be configured by modifying the [`config/spring_boot_cli.yml`][] file.  The container uses the [`Repository` utility support][repositories] and so it supports the [version syntax][] defined there.
+The container can be configured by modifying the [`config/spring_boot_cli.yml`][] file in the buildpack fork.  The container uses the [`Repository` utility support][repositories] and so it supports the [version syntax][] defined there.
 
 | Name | Description
 | ---- | -----------
 | `repository_root` | The URL of the Spring Boot CLI repository index ([details][repositories]).
 | `version` | The version of Spring Boot CLI to use. Candidate versions can be found in [this listing][].
 
-[Configuration and Extension]: ../README.md#Configuration-and-Extension
+[Configuration and Extension]: ../README.md#configuration-and-extension
 [`config/spring_boot_cli.yml`]: ../config/spring_boot_cli.yml
 [repositories]: extending-repositories.md
 [Spring profiles]:http://blog.springsource.com/2011/02/14/spring-3-1-m1-introducing-profile/

@@ -1,5 +1,5 @@
 # Extending
-For general information on extending the buildpack, refer to [Configuration and Extension](../README.md#Configuration-and-Extension).
+For general information on extending the buildpack, refer to [Configuration and Extension](../README.md#configuration-and-extension).
 
 To add a component, its class name must be added added to [`config/components.yml`][].  It is recommended, but not required, that the class' file be placed in a directory that matches its type.
 
@@ -24,7 +24,7 @@ def detect
 # whatever way is necessary (e.g. downloading files or creating symbolic links) to support the function of the
 # component.  Status output written to +STDOUT+ is expected as part of this invocation.
 #
-# @return [void]
+# @return [Void]
 def compile
 
 # Modifies the application's runtime configuration. The component is expected to transform members of the +droplet+

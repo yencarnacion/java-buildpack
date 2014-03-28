@@ -25,7 +25,7 @@ For details on the repository structure, see the [repository documentation][repo
 ## Configuration
 For general information on configuring the buildpack, refer to [Configuration and Extension][].
 
-The JRE can be configured by modifying the [`config/oracle_jre.yml`][] file.  The JRE uses the [`Repository` utility support][repositories] and so it supports the [version syntax][]  defined there.
+The JRE can be configured by modifying the [`config/oracle_jre.yml`][] file in the buildpack fork.  The JRE uses the [`Repository` utility support][repositories] and so it supports the [version syntax][]  defined there.
 
 | Name | Description
 | ---- | -----------
@@ -83,7 +83,7 @@ Termination is guaranteed since there is a finite number of memory types and in 
 
 [`config/components.yml`]: ../config/components.yml
 [`config/oracle_jre.yml`]: ../config/oracle_jre.yml
-[Configuration and Extension]: ../README.md#Configuration-and-Extension
+[Configuration and Extension]: ../README.md#configuration-and-extension
 [OpenJDK JRE]: jre-open_jdk.md
 [Oracle]: http://www.oracle.com/technetwork/java/index.html
 [repositories]: extending-repositories.md

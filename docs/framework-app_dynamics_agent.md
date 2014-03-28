@@ -26,7 +26,7 @@ When binding AppDynamics using a user-provided service, it must have name or tag
 ## Configuration
 For general information on configuring the buildpack, refer to [Configuration and Extension][].
 
-The framework can be configured by modifying the [`config/app_dynamics_agent.yml`][] file.  The framework uses the [`Repository` utility support][repositories] and so it supports the [version syntax][] defined there.
+The framework can be configured by modifying the [`config/app_dynamics_agent.yml`][] file in the buildpack fork.  The framework uses the [`Repository` utility support][repositories] and so it supports the [version syntax][] defined there.
 
 | Name | Description
 | ---- | -----------
@@ -36,7 +36,7 @@ The framework can be configured by modifying the [`config/app_dynamics_agent.yml
 
 [`config/app_dynamics_agent.yml`]: ../config/app_dynamics_agent.yml
 [AppDynamics Service]: http://www.appdynamics.com
-[Configuration and Extension]: ../README.md#Configuration-and-Extension
+[Configuration and Extension]: ../README.md#configuration-and-extension
 [repositories]: extending-repositories.md
 [this listing]: http://download.pivotal.io.s3.amazonaws.com/app-dynamics/index.yml
 [version syntax]: extending-repositories.md#version-syntax-and-ordering
