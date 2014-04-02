@@ -15,6 +15,7 @@
 # limitations under the License.
 
 require 'java_buildpack'
+require 'java_buildpack/buildpack_version'
 require 'java_buildpack/component/additional_libraries'
 require 'java_buildpack/component/application'
 require 'java_buildpack/component/droplet'
@@ -39,12 +40,11 @@ module JavaBuildpack
     #                         this application.  If no container can run the application, the array will be empty
     #                         (+[]+).
     def detect
-      diagnose_git_info false
-
       tags = tag_detection('container', @containers, true)
       tags.concat tag_detection('JRE', @jres, true) unless tags.empty?
       tags.concat tag_detection('framework', @frameworks, false) unless tags.empty?
-      tags = tags.flatten.compact
+      tags << "java-buildpack=#{@buildpack_version.to_s false}" unless tags.empty?
+      tags = tags.flatten.compact.sort
 
       @logger.debug { "Detection Tags: #{tags}" }
       tags
@@ -54,7 +54,7 @@ module JavaBuildpack
     #
     # @return [Void]
     def compile
-      diagnose_git_info true
+      puts BUILDPACK_MESSAGE % @buildpack_version
 
       container = component_detection(@containers).first
       fail 'No container can run this application' unless container
@@ -69,8 +69,6 @@ module JavaBuildpack
     #
     # @return [String] The payload required to run the application.
     def release
-      diagnose_git_info false
-
       container = component_detection(@containers).first
       fail 'No container can run this application' unless container
 
@@ -93,14 +91,13 @@ module JavaBuildpack
 
     private
 
-    DEFAULT_BUILDPACK_MESSAGE = '-----> Java Buildpack source: system'.freeze
-
-    GIT_DIR = Pathname.new(__FILE__).dirname + '../../.git'
+    BUILDPACK_MESSAGE = '-----> Java Buildpack Version: %s'.freeze
 
     LOAD_ROOT = Pathname.new(__FILE__).dirname + '..'
 
     def initialize(app_dir, application)
-      @logger = Logging::LoggerFactory.get_logger Buildpack
+      @logger            = Logging::LoggerFactory.instance.get_logger Buildpack
+      @buildpack_version = BuildpackVersion.new
 
       log_environment_variables
 
@@ -121,31 +118,6 @@ module JavaBuildpack
 
     def component_detection(components)
       components.select { |component| component.detect }
-    end
-
-    def diagnose_git_info(print)
-      if system("git --git-dir=#{GIT_DIR} status 2>/dev/null 1>/dev/null")
-        remote_url      = diagnose_remotes
-        head_commit_sha = diagnose_head_commit
-        puts "-----> Java Buildpack source: #{remote_url}##{head_commit_sha}" if print
-      else
-        @logger.debug { DEFAULT_BUILDPACK_MESSAGE }
-        puts DEFAULT_BUILDPACK_MESSAGE if print
-      end
-    end
-
-    def diagnose_head_commit
-      git 'log HEAD^!', 'git HEAD commit: %s'
-    end
-
-    def diagnose_remotes
-      git 'remote -v', 'git remotes: %s'
-    end
-
-    def git(command, message)
-      result = `git --git-dir=#{GIT_DIR} #{command}`
-      @logger.debug { message % result }
-      result.split(' ')[1]
     end
 
     def instantiate(components, additional_libraries, application, java_home, java_opts, root)
@@ -201,7 +173,7 @@ module JavaBuildpack
       def with_buildpack(app_dir, message)
         app_dir     = Pathname.new(File.expand_path(app_dir))
         application = Component::Application.new(app_dir)
-        Logging::LoggerFactory.setup app_dir
+        Logging::LoggerFactory.instance.setup app_dir
 
         yield new(app_dir, application) if block_given?
       rescue => e
@@ -211,10 +183,13 @@ module JavaBuildpack
       private
 
       def handle_error(e, message)
-        logger = Logging::LoggerFactory.get_logger Buildpack
+        if Logging::LoggerFactory.instance.initialized
+          logger = Logging::LoggerFactory.instance.get_logger Buildpack
 
-        logger.error { message % e.inspect }
-        logger.debug { "Exception #{e.inspect} backtrace:\n#{e.backtrace.join("\n")}" }
+          logger.error { message % e.inspect }
+          logger.debug { "Exception #{e.inspect} backtrace:\n#{e.backtrace.join("\n")}" }
+        end
+
         abort e.message
       end
 
