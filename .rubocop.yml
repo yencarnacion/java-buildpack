@@ -1,11 +1,11 @@
 ---
 AllCops:
-  Includes:
+  Include:
     - Rakefile
-    - rakelib/**
-  Excludes:
-    - build/**
-    - vendor/**
+    - rakelib/**/*
+  Exclude:
+    - build/**/*
+    - vendor/**/*
 ClassLength:
   Max: 200
 CyclomaticComplexity:

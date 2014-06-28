@@ -32,15 +32,15 @@ module Package
     include Package
 
     def initialize
-      if OFFLINE
-        JavaBuildpack::Logging::LoggerFactory.instance.setup "#{BUILD_DIR}/"
+      return unless BUILDPACK_VERSION.offline
 
-        @default_repository_root = default_repository_root
-        @cache                   = cache
+      JavaBuildpack::Logging::LoggerFactory.instance.setup "#{BUILD_DIR}/"
 
-        configurations = component_ids.map { |component_id| configurations(configuration(component_id)) }.flatten
-        uris(configurations).each { |uri| multitask PACKAGE_NAME => [cache_task(uri)] }
-      end
+      @default_repository_root = default_repository_root
+      @cache                   = cache
+
+      configurations = component_ids.map { |component_id| configurations(configuration(component_id)) }.flatten
+      uris(configurations).each { |uri| multitask PACKAGE_NAME => [cache_task(uri)] }
     end
 
     private
@@ -50,6 +50,8 @@ module Package
     DEFAULT_REPOSITORY_ROOT_PATTERN = /\{default.repository.root\}/.freeze
 
     PLATFORM_PATTERN = /\{platform\}/.freeze
+
+    private_constant :ARCHITECTURE_PATTERN, :DEFAULT_REPOSITORY_ROOT_PATTERN, :PLATFORM_PATTERN
 
     def augment(raw, pattern, candidates, &block)
       if raw.respond_to? :map
@@ -110,7 +112,7 @@ module Package
       if repository_configuration?(configuration)
         configurations << configuration
       else
-        configurations << configuration.values.map { |v| configurations(v) }
+        configuration.values.each { |v| configurations << configurations(v) if v.is_a? Hash }
       end
 
       configurations
@@ -137,6 +139,8 @@ module Package
 
       configurations.each do |configuration|
         index_uris(configuration).each do |index_uri|
+          multitask PACKAGE_NAME => [cache_task(index_uri)]
+
           @cache.get(index_uri) do |f|
             index = YAML.load f
             uris << index[version(configuration, index).to_s]

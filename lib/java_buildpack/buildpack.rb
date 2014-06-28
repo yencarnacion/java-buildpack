@@ -56,11 +56,11 @@ module JavaBuildpack
     def compile
       puts BUILDPACK_MESSAGE % @buildpack_version
 
-      container = component_detection(@containers).first
+      container = component_detection('container', @containers, true).first
       fail 'No container can run this application' unless container
 
-      component_detection(@jres).first.compile
-      component_detection(@frameworks).each { |framework| framework.compile }
+      component_detection('JRE', @jres, true).first.compile
+      component_detection('framework', @frameworks, false).each { |framework| framework.compile }
       container.compile
     end
 
@@ -69,11 +69,11 @@ module JavaBuildpack
     #
     # @return [String] The payload required to run the application.
     def release
-      container = component_detection(@containers).first
+      container = component_detection('container', @containers, true).first
       fail 'No container can run this application' unless container
 
-      component_detection(@jres).first.release
-      component_detection(@frameworks).each { |framework| framework.release }
+      component_detection('JRE', @jres, true).first.release
+      component_detection('framework', @frameworks, false).each { |framework| framework.release }
       command = container.release
 
       payload = {
@@ -82,7 +82,7 @@ module JavaBuildpack
         'default_process_types' => { 'web' => command }
       }.to_yaml
 
-      @logger.debug { "Release Payload #{payload}" }
+      @logger.debug { "Release Payload:\n#{payload}" }
 
       payload
     end
@@ -93,7 +93,9 @@ module JavaBuildpack
 
     BUILDPACK_MESSAGE = '-----> Java Buildpack Version: %s'.freeze
 
-    LOAD_ROOT = Pathname.new(__FILE__).dirname + '..'
+    LOAD_ROOT = (Pathname.new(__FILE__).dirname + '..').freeze
+
+    private_constant :BUILDPACK_MESSAGE, :LOAD_ROOT
 
     def initialize(app_dir, application)
       @logger            = Logging::LoggerFactory.instance.get_logger Buildpack
@@ -116,8 +118,26 @@ module JavaBuildpack
                                 java_opts, app_dir)
     end
 
-    def component_detection(components)
-      components.select { |component| component.detect }
+    def component_detection(type, components, unique)
+      detected, _tags = detection type, components, unique
+      detected
+    end
+
+    def detection(type, components, unique)
+      detected = []
+      tags     = []
+
+      components.each do |component|
+        result = component.detect
+
+        next unless result
+
+        detected << component
+        tags << result
+      end
+
+      fail "Application can be run by more than one #{type}: #{names detected}" if unique && detected.size > 1
+      [detected, tags]
     end
 
     def instantiate(components, additional_libraries, application, java_home, java_opts, root)
@@ -130,7 +150,8 @@ module JavaBuildpack
         context      = {
           application:   application,
           configuration: Util::ConfigurationUtils.load(component_id),
-          droplet:       Component::Droplet.new(additional_libraries, component_id, java_home, java_opts, root) }
+          droplet:       Component::Droplet.new(additional_libraries, component_id, java_home, java_opts, root)
+        }
 
         component.constantize.new(context)
       end
@@ -156,8 +177,7 @@ module JavaBuildpack
     end
 
     def tag_detection(type, components, unique)
-      tags = components.map { |component| component.detect }.compact
-      fail "Application can be run by more than one #{type}: #{names components}" if unique && tags.size > 1
+      _detected, tags = detection type, components, unique
       tags
     end
 

@@ -30,10 +30,10 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
-        if supports?
-          download_jar(jar_name, tomcat_lib)
-          mutate_context
-        end
+        return unless supports?
+
+        download_jar(jar_name, tomcat_lib)
+        mutate_context
       end
 
       # (see JavaBuildpack::Component::BaseComponent#release)
@@ -44,7 +44,7 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::VersionedDependencyComponent#supports?)
       def supports?
-        @application.services.one_service? FILTER, KEY_HOST_NAME, KEY_PORT, KEY_PASSWORD
+        @application.services.one_service? FILTER, [KEY_HOST_NAME, KEY_HOST], KEY_PORT, KEY_PASSWORD
       end
 
       private
@@ -55,6 +55,8 @@ module JavaBuildpack
 
       KEY_HOST_NAME = 'hostname'.freeze
 
+      KEY_HOST = 'host'.freeze
+
       KEY_PASSWORD = 'password'.freeze
 
       KEY_PORT = 'port'.freeze
@@ -62,6 +64,9 @@ module JavaBuildpack
       PERSISTENT_MANAGER_CLASS_NAME = 'org.apache.catalina.session.PersistentManager'.freeze
 
       REDIS_STORE_CLASS_NAME = 'com.gopivotal.manager.redis.RedisStore'.freeze
+
+      private_constant :FILTER, :FLUSH_VALVE_CLASS_NAME, :KEY_HOST_NAME, :KEY_PASSWORD, :KEY_PORT,
+                       :PERSISTENT_MANAGER_CLASS_NAME, :REDIS_STORE_CLASS_NAME
 
       def add_manager(context)
         manager = context.add_element 'Manager', 'className' => PERSISTENT_MANAGER_CLASS_NAME
@@ -73,7 +78,7 @@ module JavaBuildpack
 
         manager.add_element 'Store',
                             'className'          => REDIS_STORE_CLASS_NAME,
-                            'host'               => credentials[KEY_HOST_NAME],
+                            'host'               => credentials[KEY_HOST_NAME] || credentials[KEY_HOST],
                             'port'               => credentials[KEY_PORT],
                             'database'           => @configuration['database'],
                             'password'           => credentials[KEY_PASSWORD],
